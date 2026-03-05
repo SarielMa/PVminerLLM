@@ -80,22 +80,7 @@ def fix_structure(input_str):
     return corrected_json
     
 
-# def safe_json_loads(input_str):
 
-#     try:
-#         return json.loads(input_str)
-#     except json.JSONDecodeError:
-#         # 尝试修复非法反斜杠
-#         input_str = input_str.replace('\\', '\\\\')  # 全部转义
-#         try:
-#             return json.loads(input_str)
-#         except json.JSONDecodeError:
-#             # 尝试只保留符合结构的结果字段
-#             pattern = re.compile(r'\{\s*"Code"\s*:\s*"[^"]*"\s*,\s*"Sub-code"\s*:\s*"[^"]*"\s*,\s*"Span"\s*:\s*"[^"]*"\s*\}')
-#             matches = pattern.findall(input_str)
-#             if not matches:
-#                 return {"results": []}
-#             return {"results": [json.loads(m.replace('\\', '\\\\')) for m in matches]}
 
 def safe_json_loads(input_str):
     import html
@@ -108,7 +93,7 @@ def safe_json_loads(input_str):
     except json.JSONDecodeError:
         pass
 
-    # 尝试解码 HTML 实体符号并转义单引号
+
     input_str = html.unescape(input_str)
     input_str = input_str.replace("'", '"')  # 单引号改成双引号
     input_str = input_str.replace("\\", "\\\\")  # 再次防止反斜杠问题

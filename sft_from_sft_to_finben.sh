@@ -4,9 +4,9 @@ set -euo pipefail
 # =========================
 # Global settings
 # =========================
-DATASET_PATH="/home/lm2445/project_pi_sjf37/lm2445/PV_multiagent/benckmark/PV_benckmark/split_out/non_test/"
+DATASET_PATH="PATH_TO_TRAINING_DATA/"
 PY_SCRIPT="sft_peft_ddp.py"
-FINBEN_TASKS_PATH="/home/lm2445/project_pi_sjf37/lm2445/finben/FinBen/tasks/pv_miner"
+FINBEN_TASKS_PATH="PATH_TO_FINBEN/tasks/pv_miner"
 
 MAX_LEN=8192
 BATCH_SIZE=1

@@ -7,7 +7,7 @@
 #SBATCH --mem=256G
 #SBATCH --partition=gpu_h200
 #SBATCH --output=%j_gpu_job.txt
-#SBATCH --mail-user=linhai.ma@yale.edu
+
 
 set -euo pipefail
 
@@ -36,5 +36,5 @@ which python
 python -c "import torch; print('torch cuda:', torch.version.cuda); print('gpus:', torch.cuda.device_count())"
 nvidia-smi
 
-cd /home/lm2445/project_pi_sjf37/lm2445/PV_multiagent/sft
+cd HOME_TO_SFT
 sh sft_from_sft_to_finben.sh
