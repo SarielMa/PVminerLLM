@@ -26,6 +26,32 @@ DEFAULT_SAMPLES = {
         "runs_pv_epoch10_b200__llama3.3_70b_instruct__sft_10ep__merged/"
         "samples_PvExtraction_full_2026-06-05T18-14-33.129764.jsonl"
     ),
+    "Two-shot 8B": Path(
+        "runs_pv_epoch10_b200/llama3.1_8b_instruct/sft_10ep/"
+        "raw_2shot_lm_eval_results/PvExtraction_full/"
+        "meta-llama__Llama-3.1-8B-Instruct/"
+        "samples_PvExtraction_full_2026-06-05T18-16-49.757009.jsonl"
+    ),
+    "SFT 8B": Path(
+        "runs_pv_epoch10_b200/llama3.1_8b_instruct/sft_10ep/"
+        "sft_lm_eval_results/PvExtraction_full/"
+        "__nfs__roberts__project__pi_sjf37__lm2445__PV_multiagent__sft_open__"
+        "runs_pv_epoch10_b200__llama3.1_8b_instruct__sft_10ep__merged/"
+        "samples_PvExtraction_full_2026-06-05T18-47-41.195465.jsonl"
+    ),
+    "Two-shot 3B": Path(
+        "runs_pv_epoch10_b200/llama3.2_3b_instruct/sft_10ep/"
+        "raw_2shot_lm_eval_results/PvExtraction_full/"
+        "meta-llama__Llama-3.2-3B-Instruct/"
+        "samples_PvExtraction_full_2026-06-05T18-49-04.277522.jsonl"
+    ),
+    "SFT 3B": Path(
+        "runs_pv_epoch10_b200/llama3.2_3b_instruct/sft_10ep/"
+        "sft_lm_eval_results/PvExtraction_full/"
+        "__nfs__roberts__project__pi_sjf37__lm2445__PV_multiagent__sft_open__"
+        "runs_pv_epoch10_b200__llama3.2_3b_instruct__sft_10ep__merged/"
+        "samples_PvExtraction_full_2026-06-05T19-09-33.716122.jsonl"
+    ),
     "Two-shot 1.5B": Path(
         "runs_pv_epoch10_b200/qwen2.5_1.5b_instruct/sft_10ep/"
         "raw_2shot_lm_eval_results/PvExtraction_full/"
@@ -111,6 +137,11 @@ def evaluate_sample(label: str, sample_path: Path) -> dict[str, Any]:
                     exact_count += 1
 
     exact_pct = 100 * exact_count / predicted_count if predicted_count else 0.0
+    hallucination_pct = (
+        100 * (predicted_count - exact_count) / predicted_count
+        if predicted_count
+        else 0.0
+    )
     return {
         "model": label,
         "sample_path": str(sample_path),
@@ -120,6 +151,7 @@ def evaluate_sample(label: str, sample_path: Path) -> dict[str, Any]:
         "exact_substring_spans": exact_count,
         "exact_substring_pct": round(exact_pct, 2),
         "non_substring_spans": predicted_count - exact_count,
+        "hallucination_pct": round(hallucination_pct, 2),
         "empty_spans": empty_span_count,
     }
 
