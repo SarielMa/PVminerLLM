@@ -26,7 +26,7 @@ MODELS=(
   "meta-llama/Llama-3.3-70B-Instruct"
   "meta-llama/Llama-3.1-8B-Instruct"
   "meta-llama/Llama-3.2-3B-Instruct"
-  # "Qwen/Qwen2.5-1.5B-Instruct"
+  "Qwen/Qwen2.5-1.5B-Instruct"
 )
 
 # =========================
@@ -131,6 +131,7 @@ for MODEL in "${MODELS[@]}"; do
   #    output_path is a PREFIX, not a directory.
   # --------------------------------------------------
   TASK="PvExtraction_full"
+  
 
   # Ensure we do NOT have a directory that collides with the prefix.
   # This is a common cause of "saved" but nothing where you expect.
