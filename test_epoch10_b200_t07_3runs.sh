@@ -150,6 +150,31 @@ run_eval () {
 }
 
 # =========================
+# Smoke test FIRST: the heaviest case (70B raw 2-shot, run 1, max_model_len
+# = BASE_LEN*4). If anything is going to OOM / fail to fit, surface it
+# immediately instead of after hours. This writes to the same output dir the
+# main loop would use, and the loop skips re-running this exact combo.
+# =========================
+SMOKE_MODEL="meta-llama/Llama-3.3-70B-Instruct"
+SMOKE_SHOT=2
+SMOKE_RUN=1
+SMOKE_SEED=$((1000 + SMOKE_RUN))
+
+SMOKE_SLUG="$(model_slug "$(basename "${SMOKE_MODEL}")")"
+SMOKE_DIR="$(readlink -f "${PIPELINE_ROOT}/${SMOKE_SLUG}/${RUN_TAG}")"
+SMOKE_TEST_ROOT="${SMOKE_DIR}/test_t${TEMPERATURE}"
+require_path "${SMOKE_DIR}/merged" "merged SFT model (${SMOKE_SLUG})"
+
+echo "############################################################"
+echo "SMOKE TEST  : ${SMOKE_MODEL}  RAW ${SMOKE_SHOT}-shot  run ${SMOKE_RUN}  seed ${SMOKE_SEED}"
+echo "############################################################"
+run_eval "${SMOKE_MODEL}" "${SMOKE_SHOT}" \
+  "${SMOKE_TEST_ROOT}/raw/${SMOKE_SHOT}shot/run${SMOKE_RUN}" \
+  "${SMOKE_TEST_ROOT}/logs/eval_raw_${SMOKE_SHOT}shot_run${SMOKE_RUN}.log" \
+  "${SMOKE_SEED}"
+echo "SMOKE TEST PASSED — proceeding to full sweep."
+
+# =========================
 # Main loop
 # =========================
 for MODEL in "${MODELS[@]}"; do
@@ -180,6 +205,11 @@ for MODEL in "${MODELS[@]}"; do
 
     # ----- RAW base model, 0/1/2-shot -----
     for SHOT in "${RAW_SHOTS[@]}"; do
+      # Skip the combo already covered by the smoke test above.
+      if [[ "${MODEL}" == "${SMOKE_MODEL}" && "${R}" -eq "${SMOKE_RUN}" && "${SHOT}" -eq "${SMOKE_SHOT}" ]]; then
+        echo ">>> [${MODEL_SLUG}] RAW  ${SHOT}-shot  run ${R}  (already done in smoke test, skipping)"
+        continue
+      fi
       RAW_OUT="${TEST_ROOT}/raw/${SHOT}shot/run${R}"
       RAW_LOG="${LOG_DIR}/eval_raw_${SHOT}shot_run${R}.log"
       echo ">>> [${MODEL_SLUG}] RAW  ${SHOT}-shot  run ${R}  seed ${SEED}"
