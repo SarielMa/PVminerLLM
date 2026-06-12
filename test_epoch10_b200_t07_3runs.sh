@@ -60,7 +60,7 @@ PIPELINE_ROOT="${PIPELINE_ROOT:-$(readlink -f "${REPO_ROOT}/runs_pv_epoch${EPOCH
 # Models (raw base models -> slug must match the trained run folders)
 # =========================
 MODELS=(
-  "meta-llama/Llama-3.3-70B-Instruct"
+  # "meta-llama/Llama-3.3-70B-Instruct"
   "meta-llama/Llama-3.1-8B-Instruct"
   "meta-llama/Llama-3.2-3B-Instruct"
   "Qwen/Qwen2.5-1.5B-Instruct"
@@ -197,13 +197,7 @@ for MODEL in "${MODELS[@]}"; do
   for ((R=1; R<=NUM_RUNS; R++)); do
     SEED=$((1000 + R))
 
-    # ----- SFT (merged) model -----
-    SFT_OUT="${TEST_ROOT}/sft/${SFT_SHOT}shot/run${R}"
-    SFT_LOG="${LOG_DIR}/eval_sft_${SFT_SHOT}shot_run${R}.log"
-    echo ">>> [${MODEL_SLUG}] SFT  ${SFT_SHOT}-shot  run ${R}  seed ${SEED}"
-    run_eval "${MERGED_DIR}" "${SFT_SHOT}" "${SFT_OUT}" "${SFT_LOG}" "${SEED}"
-
-    # ----- RAW base model, 0/1/2-shot -----
+    # ----- RAW base model, 0/1/2-shot (run before SFT) -----
     for SHOT in "${RAW_SHOTS[@]}"; do
       # Skip the combo already covered by the smoke test above.
       if [[ "${MODEL}" == "${SMOKE_MODEL}" && "${R}" -eq "${SMOKE_RUN}" && "${SHOT}" -eq "${SMOKE_SHOT}" ]]; then
@@ -215,6 +209,12 @@ for MODEL in "${MODELS[@]}"; do
       echo ">>> [${MODEL_SLUG}] RAW  ${SHOT}-shot  run ${R}  seed ${SEED}"
       run_eval "${MODEL}" "${SHOT}" "${RAW_OUT}" "${RAW_LOG}" "${SEED}"
     done
+
+    # ----- SFT (merged) model (run after RAW) -----
+    SFT_OUT="${TEST_ROOT}/sft/${SFT_SHOT}shot/run${R}"
+    SFT_LOG="${LOG_DIR}/eval_sft_${SFT_SHOT}shot_run${R}.log"
+    echo ">>> [${MODEL_SLUG}] SFT  ${SFT_SHOT}-shot  run ${R}  seed ${SEED}"
+    run_eval "${MERGED_DIR}" "${SFT_SHOT}" "${SFT_OUT}" "${SFT_LOG}" "${SEED}"
   done
 
   echo "DONE: ${MODEL_TAG}"
